@@ -1,7 +1,7 @@
 #include<vector>
 #include<string>
 
-namespace
+namespace pbrt
 {
     //forward declarations
     class Shape;
@@ -14,4 +14,14 @@ namespace
     class Medium;
     class Light;
     class Integrator;
+
+
+    //global variables
+    struct Options
+    {
+        int nThreads = 0;
+        bool quickRender = false;
+        bool quiet = false, verbose = false;
+        std::string imageFile;
+    };
 }

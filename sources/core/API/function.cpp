@@ -4,3 +4,9 @@ void pbrtInit(const Options& option)
 {
     PbrtOptions = option;
 }
+
+
+void pbrtCleanup()
+{
+    
+}
