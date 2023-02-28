@@ -1,5 +1,5 @@
+#pragma once
 #include"../pbrt.h"
-#include"memory"
 
 namespace pbrt
 {

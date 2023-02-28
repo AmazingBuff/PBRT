@@ -44,4 +44,8 @@ namespace pbrt
     void ParallelFor(const std::function<void(int)>& function, int count, int chunkSize = 1);
     //parallel for 2D like image
     void ParallelFor2D(std::function<void(Point2i)>& function, const Point2i& count);
+    //return max thread index
+    int MaxThreadIndex();
+    //return the processor count of the system
+    int NumSystemCores();
 }   

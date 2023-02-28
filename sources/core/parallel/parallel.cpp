@@ -79,6 +79,8 @@ namespace pbrt
                     if(loop.function1D)
                         loop.function1D(index);
                     //handle other types of loops
+                    else if(loop.function2D)
+                        loop.function2D(Point2i(index % loop.xSum, index / loop.xSum));
                 }
                 lock.lock();
                 //update loop to reflect completion of iterations
@@ -195,10 +197,34 @@ namespace pbrt
                 if(loop.function1D)
                     loop.function1D(index);
                 //handle other types of loops
+                else if(loop.function2D)
+                    loop.function2D(Point2i(index % loop.xSum, index / loop.xSum));
             }
             lock.lock();
             //update loop to reflect completion of iterations
             loop.activeWorkers--;
         }
     }
+
+    int MaxThreadIndex()
+    {
+        if(PbrtOptions.nThreads != 1)
+        {
+            //launch worker threads if needed
+            if(threads.size() == 0)
+            {
+                ThreadIndex = 0;
+                //except for current execution thread
+                for(int i = 0; i < NumSystemCores() - 1; i++)
+                    threads.push_back(std::thread(workerThreadFunc, i + 1));
+            }
+        }
+        return 1 + threads.size();
+    }
+
+    int NumSystemCores() 
+    {
+        return std::max(1u, std::thread::hardware_concurrency());
+    }
+
 }
