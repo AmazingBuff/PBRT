@@ -37,9 +37,41 @@ namespace pbrt
     //replace the active CTM
     void pbrtTransform(Float transform[16]);
 
-    //copy current transform into namedCoordinateSystem
+    //copy current transform into namedCoordinateSystems
     void pbrtCoordinateSystem(const std::string& name);
 
-    //
+    //make current transform get form namedCoordinateSystems
     void pbrtCoordSysTransform(const std::string& name);
+
+    //set transform bits to active
+    void pbrtActiveTransformAll();
+    void pbrtActiveTransformEndTime();
+    void pbrtActiveTransformStartTime();
+
+    //the defined time of two current transform matrices
+    void pbrtTransformTimes(Float start, Float end);
+
+    //set which kind of Filter to be used for filtering image samples
+    void pbrtPixelFilter(const std::string& name, const ParamSet& params);
+
+    //set which kind of Film to be used
+    void pbrtFilm(const std::string& type, const ParamSet& params);
+
+    //set which kind of Sampler to be used
+    void pbrtSampler(const std::string& name, const ParamSet& params);
+
+    //set which kind of Accelerator to be used
+    void pbrtAccelerator(const std::string& name, const ParamSet& params);
+
+    //set which kind of Integrator to be used
+    void pbrtIntegrator(const std::string& name, const ParamSet& params);
+
+    //set the variable of the camera to be used
+    void pbrtCamera(const std::string& name, const ParamSet& params);
+
+    //set the type of participation media
+    void pbrtMakeNamedMedium(const std::string& name, const ParamSet& params);
+
+    //set the two side types of specified surface
+    void pbrtMediumInterface(const std::string& insideName, const std::string& outsideName);
 }

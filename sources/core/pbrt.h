@@ -59,6 +59,10 @@ namespace pbrt
     class Integrator;
 
 
+
+    class ParamSet;
+    template <typename T>
+    struct ParamSetItem;
     //global structure
     struct Options
     {
