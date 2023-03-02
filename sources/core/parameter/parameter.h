@@ -1,5 +1,6 @@
 #pragma once
 #include"../pbrt.h"
+#include<map>
 
 namespace pbrt
 {
@@ -88,5 +89,31 @@ namespace pbrt
         std::vector<std::shared_ptr<ParamSetItem<Spectrum>>> spectra;
         std::vector<std::shared_ptr<ParamSetItem<std::string>>> strings;
         std::vector<std::shared_ptr<ParamSetItem<std::string>>> textures;
+    };
+
+
+    //specific parameters for texture, notify the order of access
+    class TextureParams
+    {
+    public:
+        TextureParams(const ParamSet& geometryParams, const ParamSet& materialParams,
+        std::map<std::string, std::shared_ptr<Texture<Float>>>& floatTextures, 
+        std::map<std::string, std::shared_ptr<Texture<Spectrum>>>& sepctrumTextures)
+        : geometryParams(geometryParams), materialParams(materialParams), 
+          floatTextures(floatTextures), sepctrumTextures(sepctrumTextures) { }
+        
+        //get spectrum texture from decription, if not be found, return default
+        std::shared_ptr<Texture<Spectrum>> GetSpectrumTexture(const std::string& name, const Spectrum& def) const;
+
+        //find specific value with the order: geometryParams, then materialParams
+        Float FindFloat(const std::string& name, Float def) const
+        {
+            return geometryParams.FindOneFloat(name, materialParams.FindOneFloat(name, def));
+        }
+    private:
+        std::map<std::string, std::shared_ptr<Texture<Float>>>& floatTextures;
+        std::map<std::string, std::shared_ptr<Texture<Spectrum>>>& sepctrumTextures;
+        const ParamSet& geometryParams;
+        const ParamSet& materialParams;
     };
 }

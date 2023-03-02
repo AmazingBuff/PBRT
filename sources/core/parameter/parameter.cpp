@@ -269,4 +269,24 @@ namespace pbrt
         DEL_PARAMS(textures);
         #undef DEL_PARAMS
     }
+
+    std::shared_ptr<Texture<Spectrum>> TextureParams::GetSpectrumTexture(
+        const std::string& name, const Spectrum& def) const
+    {
+        //notify the order of search
+        std::string requiredName = geometryParams.FindTexture(name);
+        if(requiredName == "")
+            requiredName = materialParams.FindTexture(name);
+        else
+        {
+            if(sepctrumTextures.find(requiredName) != sepctrumTextures.end())
+                return sepctrumTextures[requiredName];
+            else
+                Error("Countn't find spectrum texture named \"%s\" " 
+                "for parameter \"%s\"", requiredName.c_str(), name.c_str());
+        }
+        Spectrum value = materialParams.FindOneSpectrum(name, def);
+        value = geometryParams.FindOneSpectrum(name, value);
+        return std::make_shared<ConstantTexture<Spectrum>>(value);
+    }
 }

@@ -45,24 +45,43 @@ namespace pbrt
     #define ALLOCA(TYPE, COUNT) (TYPE*)alloca((COUNT) * sizeof(TYPE))
 
 
-
-
+    //shape
     class Shape;
+    class Primitive;
+    //static shape
+    class GeometricPrimitive;
+    //animated shape
+    class TransformedPrimitive;
+
     class Aggregate;
     class Camera;
     class Sampler;
     class Filter;
     class Material;
+    template<typename T>
     class Texture;
+    //medium
     class Medium;
+    struct MediumInterface;
+    //light
     class Light;
+    class AreaLight;
+
+    //render
+    class Scene;
     class Integrator;
 
+    //alignment memory
+    class MemoryArena;
+    template <typename T, int logBlockSize = 2>
+    class BlockedArray;
 
-
+    //parameter/parameter.h
     class ParamSet;
     template <typename T>
     struct ParamSetItem;
+    class TextureParams;
+    
     //global structure
     struct Options
     {

@@ -74,4 +74,52 @@ namespace pbrt
 
     //set the two side types of specified surface
     void pbrtMediumInterface(const std::string& insideName, const std::string& outsideName);
+
+    //start of the decription of the shapes, materials, and lights in the scene
+    void pbrtWorldBegin();
+
+    //a stack to store the current attribute
+    void pbrtAttributeBegin();
+
+    //a stack to use to replace current attribute
+    void pbrtAttributeEnd();
+
+    //a stack to store the current transform
+    void pbrtTransformBegin();
+
+    //a stack to use to replace current transform
+    void pbrtTransformEnd();
+
+    //specify the texture that will be of use
+    void pbrtTexture(const std::string& name, const std::string& type, const std::string& texName, const ParamSet& params);
+
+    //specify the current material that is of use
+    void pbrtMaterial(const std::string& name, const ParamSet& params);
+
+    //define named material
+    void pbrtMakeNamedMaterial(const std::string& name, const ParamSet& params);
+
+    //set current material from previously defined named material
+    void pbrtMakeNamedMaterial(const std::string& name);
+
+    //specify the point light or directional light
+    void pbrtLightSource(const std::string& name, const ParamSet& params);
+
+    //specify the area light, but it need to call pbrtShape() to define its geometry
+    void pbrtAreaLightSource(const std::string& name, const ParamSet& params);
+
+    //specify the geometry of a new shape
+    void pbrtShape(const std::string& name, const ParamSet& params);
+
+    //create a object instance for further operation
+    void pbrtObjectBegin(const std::string& name);
+
+    //end the process of current object
+    void pbrtObjectEnd();
+
+    //instance creation
+    void pbrtObjectInstance(const std::string& name);
+
+    //end the world decription and create rendering scene and render
+    void pbrtWorldEnd();
 }
