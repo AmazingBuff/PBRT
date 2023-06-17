@@ -21,7 +21,7 @@ namespace pbrt
     //arena-based memory allocation
     class MemoryArena
     {
-        public:
+    public:
         //allocate a block of memory with initial 256kb
         MemoryArena(size_t blockSize = 262144ull) : blockSize(blockSize) { }
         //allocate nBytes from block, and return the head pointer of the allocated nbytes
@@ -42,7 +42,7 @@ namespace pbrt
         void Reset();
         //get all allocated memory
         size_t TotalAllocated() const;
-        private:
+    private:
         //avoid some undefined operation
         MemoryArena(const MemoryArena&) = delete;
         MemoryArena& operator=(const MemoryArena&) = delete;

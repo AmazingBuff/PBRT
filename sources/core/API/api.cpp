@@ -1,5 +1,5 @@
 #include"api.h"
-#include"parameter/parameter.h"
+#include"core/parameter/parameter.h"
 
 namespace pbrt
 {

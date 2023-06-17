@@ -87,6 +87,7 @@
         "queue": "cpp",
         "ranges": "cpp",
         "span": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "stack": "cpp"
     }
 }
