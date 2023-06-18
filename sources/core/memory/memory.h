@@ -1,5 +1,5 @@
 #pragma once
-#include"../pbrt.h"
+#include"core/pbrt.h"
 #include<list>
 
 //optimalize the layout of resources

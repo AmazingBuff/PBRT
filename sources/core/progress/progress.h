@@ -1,5 +1,5 @@
 #pragma once
-#include"../pbrt.h"
+#include"core/pbrt.h"
 #include<chrono>
 #include<atomic>
 #include<thread>

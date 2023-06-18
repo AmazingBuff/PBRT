@@ -12,7 +12,8 @@ namespace pbrt
         const int tileSize = 16;
         Point2i nTiles((sampleExtent.x + tileSize - 1) / tileSize,
             (sampleExtent.y + tileSize - 1) / tileSize);
-        ParallelFor2D([&](Point2i tile) {
+        ParallelFor2D([&](Point2i tile)
+        {
             //render section of image corresponding to tile
             //allocate MemoryArena for tile
             MemoryArena arena;
@@ -46,11 +47,34 @@ namespace pbrt
                     //issue warning if unexpected radiance value is returned
 
                     //add camera ray's contribution to image
+                    filmTile->AddSample(CameraSample.pFilm, L, rayWeight);
                     //free MemoryArena memory from computing image sample value
+                    arena.Reset();
                 } while (tileSampler->StartNextSample());
-
             }
-            //merge image tile into Film          
-            }, nTiles);
+            //merge image tile into Film
+            camera->film->MergeFilmTile(std::move(filmTile));
+        }, nTiles);
+        //save final image after rendering
+        camera->film->WriteImage();
+    }
+
+    Spectrum SamplerIntegrator::SpecularReflect(const RayDifferential& ray, const SurfaceInteraction& isect, const Scene& scene, Sampler& sampler, MemoryArena& arena, uint32_t depth) const
+    {
+        //compute specular reflection direction wi and BSDF value
+        Vector3f wo = isect.wo;
+        Vector3f wi;
+        Float pdf;
+        BxDFType type = BxDFType(BSDF_REFLECTION | BSDF_SPECULAR);
+        Spectrum f = isect.bsdf->Sample_f(wo, &wi, sampler.Get2D(), &pdf, type);
+        //return contribution of specular reflection
+        const Normal3f& ns = isect.shading.n;
+        if (pdf > 0 && !f.IsBlack() && AbsDot(wi, ns) != 0)
+        {
+            //compute ray differential rd for specular reflection
+            return f * Li(rd, scene, sampler, arena, depth + 1 ) * AbsDot(wi, ns) / pdf;
+        }
+        else
+            return Spectrum(0.f);
     }
 }

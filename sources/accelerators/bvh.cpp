@@ -1,5 +1,5 @@
 #include"bvh.h"
-#include"../core/memory/memory.h"
+#include"core/memory/memory.h"
 
 namespace pbrt
 {

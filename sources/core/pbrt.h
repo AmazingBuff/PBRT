@@ -1,14 +1,14 @@
 #pragma once
-#include<algorithm>
-#include<cinttypes>
-#include<cmath>
-#include<iostream>
-#include<limits>
-#include<memory>
-#include<vector>
-#include<string>
+#include <algorithm>
+#include <cinttypes>
+#include <cmath>
+#include <iostream>
+#include <limits>
+#include <memory>
+#include <vector>
+#include <string>
 
-#include"error/error.h"
+#include "error/error.h"
 
 namespace pbrt
 {
@@ -37,13 +37,18 @@ namespace pbrt
     #else
     #define Assert(expression) \
             ((expression) ? (void)0 :\
-            Severe("Assertion \"%s\" failed in %s, line %d", \
+            Error("Assertion \"%s\" failed in %s, line %d", \
                    #expression, __FILE__, __LINE__))
     #endif
 
     //stack allocate memory
     #define ALLOCA(TYPE, COUNT) (TYPE*)alloca((COUNT) * sizeof(TYPE))
 
+	//geometry
+	template<typename T>
+	class Vector2;
+	template<typename T>
+	class Vector3;
 
     //shape
     class Shape;
@@ -103,8 +108,6 @@ namespace pbrt
     static const Float Sqrt2   = 1.41421356237309504880;
 
     //global function
-    
-
     inline uint32_t FloatToBits(float f)
     {
         uint32_t ui;

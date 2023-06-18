@@ -1,5 +1,5 @@
 #pragma once
-#include"../pbrt.h"
+#include"core/pbrt.h"
 #include<map>
 
 namespace pbrt

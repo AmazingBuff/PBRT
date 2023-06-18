@@ -1,6 +1,6 @@
 #pragma once
-#include"core/pbrt.h"
-#include"core/scene/scene.h"
+#include "core/pbrt.h"
+#include "core/scene/scene.h"
 
 namespace pbrt
 {
@@ -22,6 +22,8 @@ namespace pbrt
         void Render(const Scene& scene);
         //Li
         virtual Spectrum Li(const RayDifferential& ray, const Scene& scene, Sampler& sampler, MemoryArena& arena, uint32_t depth = 0) const = 0;
+        //specular reflection
+        Spectrum SpecularReflect(const RayDifferential& ray, const SurfaceInteraction& isect, const Scene& scene, Sampler& sampler, MemoryArena& arena, uint32_t depth) const;
     protected:
         //protected data
         std::shared_ptr<const Camera> camera;
