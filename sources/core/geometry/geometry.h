@@ -417,6 +417,19 @@ namespace pbrt
 			}
 		}
 
+		Point3 operator+(const Point3<T>& other) const
+		{
+			return Point3(x + other.x, y + other.y, z + other.z);
+		}
+
+		Point3& operator+=(const Point3<T>& other)
+		{
+			x += other.x;
+			y += other.y;
+			z += other.z;
+			return *this;
+		}
+
 		Point3 operator+(const Vector3<T>& vector) const
 		{
 			return Point3(x + vector.x, y + vector.y, z + vector.z);
@@ -463,6 +476,19 @@ namespace pbrt
 			x *= scalar;
 			y *= scalar;
 			z *= scalar;
+			return *this;
+		}
+
+		Point3 operator/(T scalar) const
+		{
+			return Point3(x / scalar, y / scalar, z / scalar);
+		}
+
+		Point3& operator/=(T scalar)
+		{
+			x /= scalar;
+			y /= scalar;
+			z /= scalar;
 			return *this;
 		}
 	};
@@ -535,7 +561,7 @@ namespace pbrt
 		T x, y;
 	public:
 		Point2() { x = y = 0; }
-		Point2(T x, T y, T z) : x(x), y(y)
+		Point2(T x, T y) : x(x), y(y)
 		{
 			Assert(!HasNaNs());
 		}
@@ -584,6 +610,18 @@ namespace pbrt
 			}
 		}
 
+		Point2 operator+(const Point2<T>& other) const
+		{
+			return Point2(x + other.x, y + other.y);
+		}
+
+		Point2& operator+=(const Point2<T>& other)
+		{
+			x += other.x;
+			y += other.y;
+			return *this;
+		}
+
 		Point2 operator+(const Vector2<T>& vector) const
 		{
 			return Point2(x + vector.x, y + vector.y);
@@ -627,6 +665,18 @@ namespace pbrt
 		{
 			x *= scalar;
 			y *= scalar;
+			return *this;
+		}
+
+		Point2 operator/(T scalar) const
+		{
+			return Point2(x / scalar, y / scalar);
+		}
+
+		Point2& operator/=(T scalar)
+		{
+			x /= scalar;
+			y /= scalar;
 			return *this;
 		}
 	};
@@ -801,7 +851,220 @@ namespace pbrt
 		mutable Float tMax;
 		Float time;
 		const std::shared_ptr<Medium> medium;
+	public:
+		Ray() : tMax(std::numeric_limits<Float>::max()), time(0.f), medium(nullptr) {}
+		Ray(const Point3f& origin, const Vector3f& direction,
+			Float tMax = std::numeric_limits<Float>::max(), Float time = 0.f, const std::shared_ptr<Medium> medium = nullptr)
+			: o(origin), d(direction), tMax(tMax), time(time), medium(medium) {}
+
+		Point3f operator()(Float t) { return o + d * t; }
 	};
 
-    
+	//ray differential
+	class RayDifferential : public Ray
+	{
+	public:
+		bool hasDifferentials;
+		Point3f rxOrigin, ryOrigin;
+		Vector3f rxDirection, ryDirection;
+	public:
+		RayDifferential() { hasDifferentials = false; }
+		RayDifferential(const Point3f& origin, const Vector3f& direction,
+						Float tMax = std::numeric_limits<Float>::max(), Float time = 0.f, const std::shared_ptr<Medium> medium = nullptr)
+						: Ray(origin, direction, tMax, time, medium) { hasDifferentials = false; }
+		RayDifferential(const Ray& ray) : Ray(ray) { hasDifferentials = false; }
+
+		void ScaleDifferentials(Float s)
+		{
+			rxOrigin = o + (rxOrigin - o) * s;
+			ryOrigin = o + (ryOrigin - o) * s;
+			rxDirection = d + (rxDirection - d) * s;
+			ryDirection = d + (ryDirection - d) * s;
+		}
+	};
+
+
+	//aabb
+
+	//with left-handed, pMin(x, y, z) --> left bottom front, pMax(x, y, z) --> right top back
+	template<typename T>
+	class Bounds3
+	{
+	public:
+		Point3<T> pMin;
+		Point3<T> pMax;
+	public:
+		Bounds3()
+		{
+			T minNum = std::numeric_limits<T>::lowest();
+			T maxNum = std::numeric_limits<T>::max();
+			pMin = Point3<T>(maxNum, maxNum, maxNum);
+			pMax = Point3<T>(minNum, minNum, minNum);
+		}
+		Bounds3(const Point3<T>& point) : pMin(point), pMax(point) {}
+		Bounds3(const Point3<T>& p1, const Point3<T>& p2)
+		: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y), std::min(p1.z, p2.z)),
+		  pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y), std::max(p1.z, p2.z)) {}
+
+		//0 -- left bottom front
+		//1 -- right bottom front
+		//2 -- left top front
+		//3 -- right top front
+		//4 -- left bottom back
+		//5 -- right bottom back
+		//6 -- left top back
+		//7 -- right top back
+		Point3<T> Corner(uint32_t corner) const
+		{
+			return Point3<T>((this->operator[](corner & 1u)).x,
+							 (this->operator[]((corner & 2u) ? 1 : 0)).y,
+							 (this->operator[]((corner & 4u) ? 1 : 0)).z);
+		}
+
+		Vector3<T> Diagonal() const { return pMax - pMin; }
+
+		T SurfaceArea() const
+		{
+			Vector3<T> d = Diagonal();
+			return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
+		}
+
+		T Volume() const
+		{
+			Vector3<T> d = Diagonal();
+			return d.x * d.y * d.z;
+		}
+
+		uint32_t MaximumExtent() const
+		{
+			Vector3<T> d = Diagonal();
+			if(d.x > d.y && d.x > d.z)
+				return 0;
+			else if(d.y > d.z)
+				return 1;
+			else
+				return 2;
+		}
+
+		Point3<T> Lerp(const Point3f& t) const
+		{
+			return Point3<T>(pbrt::Lerp(t.x, pMin.x, pMax.x),
+							 pbrt::Lerp(t.y, pMin.y, pMax.y),
+							 pbrt::Lerp(t.z, pMin.z, pMax.z));
+		}
+
+		Vector3<T> Offset(const Point3<T>& point) const
+		{
+			Vector3<T> o = point - pMin;
+			if(pMax.x > pMin.x) o.x /= pMax.x - pMin.x;
+			if(pMax.y > pMin.y) o.y /= pMax.y - pMin.y;
+			if(pMax.z > pMin.z) o.z /= pMax.z - pMin.z;
+		}
+
+		void BoundingSphere(Point3<T>* center, Float* radius) const
+		{
+			*center = (pMax + pMin) / 2;
+			*radius = Inside(*center, *this) ? Distance(*center, pMax) : 0;
+		}
+
+	public:
+		//0 -- pMin, 1 -- pMax
+		Point3<T>& operator[](uint32_t index)
+		{
+			Assert(index < 2);
+			switch (index)
+			{
+				case 0: return pMin;
+				case 1: return pMax;
+			}
+		}
+		//0 -- pMin, 1 -- pMax
+		const Point3<T>& operator[](uint32_t index) const
+		{
+			Assert(index < 2);
+			switch (index)
+			{
+				case 0: return pMin;
+				case 1: return pMax;
+			}
+		}
+	};
+
+	template<typename T>
+	inline Bounds3<T> Union(const Bounds3<T>& bound, const Point3<T>& point)
+	{
+		return Bounds3<T>(Point3<T>(std::min(bound.pMin.x, point.x),
+									std::min(bound.pMin.y, point.y),
+									std::min(bound.pMin.z, point.z)),
+						  Point3<T>(std::max(bound.pMax.x, point.x),
+									std::max(bound.pMax.y, point.y),
+									std::max(bound.pMax.z, point.z)));
+	}
+
+	template<typename T>
+	inline Bounds3<T> Union(const Bounds3<T>& b1, const Bounds3<T>& b2)
+	{
+		return Bounds3<T>(Point3<T>(std::min(b1.pMin.x, b2.pMin.x),
+									std::min(b1.pMin.y, b2.pMin.x),
+									std::min(b1.pMin.z, b2.pMin.x)),
+						  Point3<T>(std::max(b1.pMax.x, b2.pMax.x),
+									std::max(b1.pMax.y, b2.pMax.x),
+									std::max(b1.pMax.z, b2.pMax.x)));
+	}
+
+	template<typename T>
+	inline Bounds3<T> Intersect(const Bounds3<T>& b1, const Bounds3<T>& b2)
+	{
+		return Bounds3<T>(Point3<T>(std::max(b1.pMin.x, b2.pMin.x),
+									std::max(b1.pMin.y, b2.pMin.x),
+									std::max(b1.pMin.z, b2.pMin.x)),
+						  Point3<T>(std::min(b1.pMax.x, b2.pMax.x),
+									std::min(b1.pMax.y, b2.pMax.x),
+									std::min(b1.pMax.z, b2.pMax.x)));
+	}
+
+	template<typename T>
+	inline bool Overlaps(const Bounds3<T>& b1, const Bounds3<T>& b2)
+	{
+		bool x = (b1.pMax.x >= b2.pMin.x) && (b1.pMin.x <= b2.pMax.x);
+		bool y = (b1.pMax.y >= b2.pMin.y) && (b1.pMin.y <= b2.pMax.y);
+		bool z = (b1.pMax.z >= b2.pMin.z) && (b1.pMin.z <= b2.pMax.z);
+		return x && y && z;
+	}
+
+	template<typename T>
+	inline bool Inside(const Point3<T>& point, const Bounds3<T>& bound)
+	{
+		return point.x >= bound.pMin.x && point.x <= bound.pMax.x &&
+			   point.y >= bound.pMin.y && point.y <= bound.pMax.y &&
+			   point.z >= bound.pMin.z && point.y <= bound.pMax.z;
+	}
+
+	template<typename T>
+	inline bool InsideExclusive(const Point3<T>& point, const Bounds3<T>& bound)
+	{
+		return point.x >= bound.pMin.x && point.x < bound.pMax.x &&
+			   point.y >= bound.pMin.y && point.y < bound.pMax.y &&
+			   point.z >= bound.pMin.z && point.y < bound.pMax.z;
+	}
+
+	template<typename T>
+	inline Bounds3<T> Expand(const Bounds3<T>& bound, T delta)
+	{
+		return Bounds3<T>(bound.pMin - Vector3<T>(delta, delta, delta),
+						  bound.pMax + Vector3<T>(delta, delta, delta));
+	}
+
+
+	template<typename T>
+	class Bounds2
+	{
+	public:
+	};
+
+	using Bounds2f = Bounds2<Float>;
+	using Bounds2i = Bounds2<int>;
+	using Bounds3f = Bounds3<Float>;
+	using Bounds3i = Bounds3<int>;
+
 } // namespace pbrt

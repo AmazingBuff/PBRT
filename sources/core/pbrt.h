@@ -179,13 +179,17 @@ namespace pbrt
     }
 
     //log2 operation for integer
-    inline int Log2Int(uint32_t value)
+    inline uint32_t Log2Int(uint32_t value)
     {
-        unsigned long mask = static_cast<unsigned long>(value);
+#ifdef __MSVC__
+        auto mask = static_cast<unsigned long>(value);
         //_BitScanReverse return conut of the first nonzero value with binary from high to low 
         unsigned long index;
         _BitScanReverse(&index, mask);
         return static_cast<int>(index);
+#elif __MINGW32__
+		return 31 - __builtin_clz(value);
+#endif
     }
 
     //judge if an integer is an exact power of 2
@@ -208,12 +212,16 @@ namespace pbrt
     }
 
     //count trailing zeros
-    inline int CountTrailingZeros(uint32_t value)
+    inline uint32_t CountTrailingZeros(uint32_t value)
     {
-        unsigned long mask = static_cast<unsigned long>(value);
+#ifdef __MSVC__
+        auto mask = static_cast<unsigned long>(value);
         unsigned long index;
         _BitScanForward(&index, mask);
         return index;
+#elif __MINGW32__
+		return __builtin_ctz(value);
+#endif
     }
 
     //bisect search for a sequential interval
