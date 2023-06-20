@@ -61,7 +61,7 @@ namespace pbrt
         void Shuffle(Iterator begin, Iterator end)
         {
             for (Iterator it = end - 1; it > begin; --it)
-                std::iter_swap(it, begin + UniformUInt32((uint32_t)(it - begin + 1)));
+                std::iter_swap(it, begin + UniformUint32((uint32_t)(it - begin + 1)));
         }
 
         void Advance(int64_t idelta)

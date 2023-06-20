@@ -100,7 +100,7 @@ namespace pbrt
 			return Vector3(x * inv, y * inv, z * inv);
 		}
 
-		Vector3& operator/=(T divisor) const
+		Vector3& operator/=(T divisor)
 		{
 			Assert(divisor != 0);
 			Float inv = static_cast<Float>(1 / divisor);
@@ -277,7 +277,7 @@ namespace pbrt
 			return Vector3(x * inv, y * inv);
 		}
 
-		Vector2& operator/=(T divisor) const
+		Vector2& operator/=(T divisor)
 		{
 			Assert(divisor != 0);
 			Float inv = static_cast<Float>(1 / divisor);

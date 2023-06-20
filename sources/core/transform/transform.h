@@ -97,18 +97,12 @@ namespace pbrt
 						  mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 			mInv = Inverse(m);
 		}
-		Transform(const Matrix4x4& mat) : m(mat), mInv(Inverse(mat)) {}
+		explicit Transform(const Matrix4x4& mat) : m(mat), mInv(Inverse(mat)) {}
 		Transform(const Matrix4x4& m, const Matrix4x4& mInv) : m(m), mInv(mInv) {}
 
-		bool IsIdentity() const
-		{
-			return m.m[0][0] == 1.f && m.m[0][1] == 0.f && m.m[0][2] == 0.f && m.m[0][3] == 0.f &&
-				   m.m[1][0] == 0.f && m.m[1][1] == 1.f && m.m[1][2] == 0.f && m.m[1][3] == 0.f &&
-				   m.m[2][0] == 0.f && m.m[2][1] == 0.f && m.m[2][2] == 1.f && m.m[2][3] == 0.f &&
-				   m.m[3][0] == 0.f && m.m[3][1] == 0.f && m.m[3][2] == 0.f && m.m[3][3] == 1.f;
-		}
-
+		bool IsIdentity() const;
 		bool HasScale() const;
+		bool IsSwapHandedness() const;
 
 		friend Transform Inverse(const Transform& transform)
 		{
@@ -139,7 +133,10 @@ namespace pbrt
 			T zp = m.m[2][0] * x + m.m[2][1] * y + m.m[2][2] * z + m.m[2][3];
 			T wp = m.m[3][0] * x + m.m[3][1] * y + m.m[3][2] * z + m.m[3][3];
 			Assert(wp != 0);
-			return Point3<T>(xp, yp, zp) / wp;
+			if(wp == 1)
+				return Point3<T>(xp, yp, zp);
+			else
+				return Point3<T>(xp, yp, zp) / wp;
 		}
 		template <typename T>
 		Vector3<T> operator()(const Vector3<T>& vector) const
@@ -153,18 +150,74 @@ namespace pbrt
 		Normal3<T> operator()(const Normal3<T>& normal) const
 		{
 			T x = normal.x, y = normal.y, z = normal.z;
-			return Normal3<T>(m.m[0][0] * x + m.m[0][1] * y + m.m[0][2] * z,
-							  m.m[1][0] * x + m.m[1][1] * y + m.m[1][2] * z,
-							  m.m[2][0] * x + m.m[2][1] * y + m.m[2][2] * z);
+			return Normal3<T>(mInv.m[0][0] * x + mInv.m[1][0] * y + mInv.m[2][0] * z,
+							  mInv.m[0][1] * x + mInv.m[1][1] * y + mInv.m[2][1] * z,
+							  mInv.m[0][2] * x + mInv.m[1][2] * y + mInv.m[2][2] * z);
+		}
+
+		Ray operator()(const Ray& ray) const
+		{
+			Vector3f oError;
+			Point3f o = this->operator()(ray.o, &oError);
+			Vector3f d = this->operator()(ray.d);
+			//offset ray origin to edge of error bounds and compute tMax
+			return Ray(o, d, tMax, ray.time, ray.medium);
+		}
+
+		Bounds3f operator()(const Bounds3f& bound) const
+		{
+			Bounds3f ret(this->operator()(bound.Corner(0)));
+			for(uint32_t i = 1; i < 8; i++)
+				ret = Union(ret, this->operator()(bound.Corner(i)));
+			return ret;
+		}
+
+		Transform operator*(const Transform& other) const
+		{
+			return Transform(Multiple(m, other.m), Multiple(other.mInv, mInv));
 		}
 
 	private:
 		Matrix4x4 m, mInv;
+		friend class Quaternion;
+		friend class AnimatedTransform;
 	};
 
 	//utility function
 	Transform Translate(const Vector3f& delta);
 	Transform Scale(Float x, Float y, Float z);
+	Transform RotateX(Float theta);
+	Transform RotateY(Float theta);
+	Transform RotateZ(Float theta);
+	Transform Rotate(Float theta, const Vector3f& axis);
+	Transform LookAt(const Point3f& pos, const Point3f& view, const Vector3f& up);
 
+
+
+	//animated transform
+	class AnimatedTransform
+	{
+	public:
+		AnimatedTransform(const Transform* startTransform, Float startTime,
+						  const Transform* endTransform, Float endTime);
+
+		//decompose order: mat = translate * rotate * scale
+		void Decompose(const Matrix4x4& mat, Vector3f* translate, Quaternion* rotate, Matrix4x4* scale);
+		void Interpolate(Float time, Transform* transform) const;
+
+	public:
+		Ray operator()(const Ray& ray) const;
+		RayDifferential operator()(const RayDifferential& ray) const;
+		Point3f operator()(Float time, const Point3f& point) const;
+		Vector3f operator()(Float time, const Vector3f& vector) const;
+	private:
+		const Transform* startTransform, *endTransform;
+		const Float startTime, endTime;
+		const bool actuallyAnimated;
+		Vector3f translateStart, translateEnd;
+		Quaternion rotateStart, rotateEnd;
+		Matrix4x4 scalarStart, scalarEnd;
+		bool hasRotation;
+	};
 }
 

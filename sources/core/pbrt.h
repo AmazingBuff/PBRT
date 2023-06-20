@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-#include "error/error.h"
+#include "logger/log.h"
 
 namespace pbrt
 {
@@ -37,7 +37,7 @@ namespace pbrt
     #else
     #define Assert(expression) \
             ((expression) ? (void)0 :\
-            Error("Assertion \"%s\" failed in %s, line %d", \
+            Fatal("Assertion \"%s\" failed in %s, line %d", \
                    #expression, __FILE__, __LINE__))
     #endif
 
@@ -49,6 +49,9 @@ namespace pbrt
 	class Vector2;
 	template<typename T>
 	class Vector3;
+
+	class Quaternion;
+	class Transform;
 
     //shape
     class Shape;
@@ -183,7 +186,7 @@ namespace pbrt
     {
 #ifdef __MSVC__
         auto mask = static_cast<unsigned long>(value);
-        //_BitScanReverse return conut of the first nonzero value with binary from high to low 
+        //_BitScanReverse return conut of the first nonzero value with binary from high to low
         unsigned long index;
         _BitScanReverse(&index, mask);
         return static_cast<int>(index);
@@ -245,7 +248,7 @@ namespace pbrt
     }
 
     //mathematical routines
-    
+
     //linear interpolation, within interval [a,b]
     inline Float Lerp(Float t, Float a, Float b)
     {

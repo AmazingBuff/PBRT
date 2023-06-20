@@ -42,8 +42,8 @@ namespace pbrt
     void ReportThreadStats();
 
     //profiler
-    //a enumerant specify the phase of execution
-    //which is implicitly defined by the order of the sort of excution 
+    //an enumerate specify the phase of execution
+    //which is implicitly defined by the order of the sort of execution
     enum class Profiler
     {
         SceneConstruction,
@@ -102,7 +102,7 @@ namespace pbrt
         ProfilePhase(Profiler phase)
         {
             categoryBit = (1ull << (int)phase);
-            //notify high-level resursion and current resursion
+            //notify high-level recursion and current recursion
             reset = (ProfilerState & categoryBit) == 0;
             ProfilerState |= categoryBit;
         }
@@ -114,7 +114,7 @@ namespace pbrt
     private:
         ProfilePhase(const ProfilePhase&) = delete;
         ProfilePhase& operator=(const ProfilePhase&) = delete;
-        //reset for resursion(such as computing Li)
+        //reset for recursion(such as computing Li)
         bool reset;
         //store the bit of corresponding current phase
         uint64_t categoryBit;
