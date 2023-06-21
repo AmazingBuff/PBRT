@@ -2,6 +2,7 @@
 
 #include "core/pbrt.h"
 #include "core/geometry/geometry.h"
+#include "core/quaternion/quaternion.h"
 
 namespace pbrt
 {
@@ -166,11 +167,27 @@ namespace pbrt
 
 		Bounds3f operator()(const Bounds3f& bound) const
 		{
-			Bounds3f ret(this->operator()(bound.Corner(0)));
-			for(uint32_t i = 1; i < 8; i++)
-				ret = Union(ret, this->operator()(bound.Corner(i)));
-			return ret;
+			return Bounds3f(Point3f(std::min(m.m[0][0] * bound.pMin.x, m.m[0][0] * bound.pMax.x) +
+									std::min(m.m[0][1] * bound.pMin.y, m.m[0][1] * bound.pMax.y) +
+									std::min(m.m[0][2] * bound.pMin.z, m.m[0][2] * bound.pMax.z) + m.m[0][3],
+									std::min(m.m[1][0] * bound.pMin.x, m.m[1][0] * bound.pMax.x) +
+									std::min(m.m[1][1] * bound.pMin.y, m.m[1][1] * bound.pMax.y) +
+									std::min(m.m[1][2] * bound.pMin.z, m.m[1][2] * bound.pMax.z) + m.m[1][3],
+									std::min(m.m[2][0] * bound.pMin.x, m.m[2][0] * bound.pMax.x) +
+									std::min(m.m[2][1] * bound.pMin.y, m.m[2][1] * bound.pMax.y) +
+									std::min(m.m[2][2] * bound.pMin.z, m.m[2][2] * bound.pMax.z) + m.m[2][3]),
+							Point3f(std::max(m.m[0][0] * bound.pMin.x, m.m[0][0] * bound.pMax.x) +
+									std::max(m.m[0][1] * bound.pMin.y, m.m[0][1] * bound.pMax.y) +
+									std::max(m.m[0][2] * bound.pMin.z, m.m[0][2] * bound.pMax.z) + m.m[0][3],
+									std::max(m.m[1][0] * bound.pMin.x, m.m[1][0] * bound.pMax.x) +
+									std::max(m.m[1][1] * bound.pMin.y, m.m[1][1] * bound.pMax.y) +
+									std::max(m.m[1][2] * bound.pMin.z, m.m[1][2] * bound.pMax.z) + m.m[1][3],
+									std::max(m.m[2][0] * bound.pMin.x, m.m[2][0] * bound.pMax.x) +
+									std::max(m.m[2][1] * bound.pMin.y, m.m[2][1] * bound.pMax.y) +
+									std::max(m.m[2][2] * bound.pMin.z, m.m[2][2] * bound.pMax.z) + m.m[2][3]));
 		}
+
+		SurfaceInteraction operator()(const SurfaceInteraction& surfaceInteraction) const;
 
 		Transform operator*(const Transform& other) const
 		{
@@ -204,6 +221,9 @@ namespace pbrt
 		//decompose order: mat = translate * rotate * scale
 		void Decompose(const Matrix4x4& mat, Vector3f* translate, Quaternion* rotate, Matrix4x4* scale);
 		void Interpolate(Float time, Transform* transform) const;
+		//get the maximum bounding box of the motion
+		Bounds3f MotionBounds(const Bounds3f& bound) const;
+		Bounds3f BoundPointMotion(const Point3f& point) const;
 
 	public:
 		Ray operator()(const Ray& ray) const;
@@ -213,11 +233,24 @@ namespace pbrt
 	private:
 		const Transform* startTransform, *endTransform;
 		const Float startTime, endTime;
+		//whether the keyframe transformation matrices are equal, true for no and false for yes
 		const bool actuallyAnimated;
 		Vector3f translateStart, translateEnd;
 		Quaternion rotateStart, rotateEnd;
-		Matrix4x4 scalarStart, scalarEnd;
+		Matrix4x4 scaleStart, scaleEnd;
 		bool hasRotation;
+
+		struct DerivativeTerm
+		{
+			Float kc, kx, ky, kz;
+			DerivativeTerm() = default;
+			DerivativeTerm(Float kc, Float kx, Float ky, Float kz) : kc(kc), kx(kx), ky(ky), kz(kz) {}
+			Float Evaluate(const Point3f& point) const
+			{
+				return kc + kx * point.x + ky * point.y + kz * point.z;
+			}
+		};
+		std::array<DerivativeTerm, 3> c1, c2, c3, c4, c5;
 	};
 }
 

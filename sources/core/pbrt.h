@@ -53,6 +53,8 @@ namespace pbrt
 	class Quaternion;
 	class Transform;
 
+	class SurfaceInteraction;
+
     //shape
     class Shape;
     class Primitive;

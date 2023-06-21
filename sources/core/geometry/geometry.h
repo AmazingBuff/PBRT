@@ -109,6 +109,16 @@ namespace pbrt
 			z *= inv;
 			return *this;
 		}
+
+		bool operator==(const Vector3& other) const
+		{
+			return x == other.x && y == other.y && z == other.z;
+		}
+
+		bool operator!=(const Vector3& other) const
+		{
+			return x != other.x || y != other.y || z != other.z;
+		}
 	};
 
 	template<typename T>
@@ -284,6 +294,16 @@ namespace pbrt
 			x *= inv;
 			y *= inv;
 			return *this;
+		}
+
+		bool operator==(const Vector2& other) const
+		{
+			return x == other.x && y == other.y;
+		}
+
+		bool operator!=(const Vector2& other) const
+		{
+			return x != other.x || y != other.y;
 		}
 	};
 
@@ -491,6 +511,16 @@ namespace pbrt
 			z /= scalar;
 			return *this;
 		}
+
+		bool operator==(const Point3& other) const
+		{
+			return x == other.x && y == other.y && z == other.z;
+		}
+
+		bool operator!=(const Point3& other) const
+		{
+			return x != other.x || y != other.y || z != other.z;
+		}
 	};
 
 	template<typename T>
@@ -636,12 +666,12 @@ namespace pbrt
 
 		Point2 operator-() const
 		{
-			return Point3(-x, -y);
+			return Point2(-x, -y);
 		}
 
 		Point2 operator-(const Vector2<T>& vector) const
 		{
-			return Point3(x - vector.x, y - vector.y);
+			return Point2(x - vector.x, y - vector.y);
 		}
 
 		Point2& operator-=(const Vector2<T>& vector)
@@ -678,6 +708,16 @@ namespace pbrt
 			x /= scalar;
 			y /= scalar;
 			return *this;
+		}
+
+		bool operator==(const Point2& other) const
+		{
+			return x == other.x && y == other.y;
+		}
+
+		bool operator!=(const Point2& other) const
+		{
+			return x != other.x || y != other.y;
 		}
 	};
 
@@ -800,6 +840,24 @@ namespace pbrt
 		{
 			return Normal3(-x, -y, -z);
 		}
+
+		Normal3& operator*=(T scalar)
+		{
+			x *= scalar;
+			y *= scalar;
+			z *= scalar;
+			return *this;
+		}
+
+		bool operator==(const Normal3& other) const
+		{
+			return x == other.x && y == other.y && z == other.z;
+		}
+
+		bool operator!=(const Normal3& other) const
+		{
+			return x != other.x || y != other.y || z != other.z;
+		}
 	};
 
 	template<typename T>
@@ -827,6 +885,18 @@ namespace pbrt
 	}
 
 	template<typename T>
+	inline T Dot(const Normal3<T>& n1, const Normal3<T>& n2)
+	{
+		return n1.x * n2.x + n1.y * n2.y + n1.z * n2.z;
+	}
+
+	template<typename T>
+	inline T AbsDot(const Normal3<T>& n1, const Normal3<T>& n2)
+	{
+		return std::abs(Dot(n1, n2));
+	}
+
+	template<typename T>
 	inline Normal3<T> Permute(const Normal3<T>& normal, uint32_t x, uint32_t y, uint32_t z)
 	{
 		return Normal3<T>(normal[x], normal[y], normal[z]);
@@ -836,6 +906,12 @@ namespace pbrt
 	inline Normal3<T> FaceForward(const Normal3<T>& normal, const Vector3<T>& vector)
 	{
 		return (Dot(normal, vector) < 0.f) ? -normal : normal;
+	}
+
+	template<typename T>
+	inline Normal3<T> FaceForward(const Normal3<T>& n1, const Normal3<T>& n2)
+	{
+		return (Dot(n1, n2) < 0.f) ? -n1 : n1;
 	}
 
 	using Normal3f = Normal3<Float>;
@@ -965,6 +1041,49 @@ namespace pbrt
 		{
 			*center = (pMax + pMin) / 2;
 			*radius = Inside(*center, *this) ? Distance(*center, pMax) : 0;
+		}
+
+		bool IntersectP(const Ray& ray, Float* hit_t0, Float* hit_t1) const
+		{
+			Float t0 = 0, t1 = ray.tMax;
+			for(uint32_t i = 0; i < 3; i++)
+			{
+				//update interval for bounding box slab
+				Float invRayDir = 1.f / ray.d[i];
+				Float tNear = (pMin[i] - ray.o[i]) * invRayDir;
+				Float tFar = (pMax[i] - ray.o[i]) * invRayDir;
+				//update parametric interval from slab intersection t values
+				if(tNear > tFar)
+					std::swap(tNear, tFar);
+				t0 = tNear > t0 ? tNear : t0;
+				t1 = tFar < t1 ? tFar : t1;
+				if(t0 > t1)
+					return false;
+			}
+			if(hit_t0) *hit_t0 = t0;
+			if(hit_t1) *hit_t1 = t1;
+			return true;
+		}
+
+		bool IntersectP(const Ray& ray, const Vector3f& invDir, const uint32_t dirIsNegative[3]) const
+		{
+			Float txMin = (this->operator[](dirIsNegative[0]).x - ray.o.x) * invDir.x;
+			Float txMax = (this->operator[](1u - dirIsNegative[0]).x - ray.o.x) * invDir.x;
+			Float tyMin = (this->operator[](dirIsNegative[0]).y - ray.o.y) * invDir.y;
+			Float tyMax = (this->operator[](1u - dirIsNegative[0]).y - ray.o.y) * invDir.y;
+
+			if(txMin > tyMax || tyMin > txMax)
+				return false;
+			Float tMin = tyMin > txMin ? tyMin : txMin;
+			Float tMax = tyMax < txMax ? tyMax : txMax;
+
+			Float tzMin = (this->operator[](dirIsNegative[0]).z - ray.o.z) * invDir.z;
+			Float tzMax = (this->operator[](1u - dirIsNegative[0]).z - ray.o.z) * invDir.z;
+			if(tMin > tzMax || tzMin > tMax)
+				return false;
+			tMin = std::max(tMin, tzMin);
+			tMax = std::min(tMax, tzMax);
+			return tMin < ray.tMax && tMax > 0.f;
 		}
 
 	public:
