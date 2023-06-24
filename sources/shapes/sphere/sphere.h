@@ -22,6 +22,8 @@ namespace pbrt
 		Bounds3f ObjectBound() const override;
 		bool Intersect(const Ray& ray, Float* tHit, SurfaceInteraction* surfaceInteraction,
 					   bool testAlphaTexture) const override;
+		bool IntersectP(const Ray& ray, bool testAlphaTexture) const override;
+		Float Area() const override;
 	private:
 		const Float radius;
 		const Float zMin, zMax;
