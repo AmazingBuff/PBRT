@@ -19,7 +19,7 @@ namespace pbrt
 		Shape(const Transform* ObjectToWorld, const Transform* WorldToObject, bool reverseOrientation);
 
 		virtual Bounds3f ObjectBound() const = 0;
-		Bounds3f WorldBound() const;
+		virtual Bounds3f WorldBound() const;
 		virtual bool Intersect(const Ray& ray, Float* tHit, SurfaceInteraction* surfaceInteraction,
 							   bool testAlphaTexture) const = 0;
 		virtual bool IntersectP(const Ray& ray, bool testAlphaTexture = true) const;

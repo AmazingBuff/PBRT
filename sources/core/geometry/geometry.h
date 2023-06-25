@@ -13,7 +13,7 @@ namespace pbrt
 	public:
 		T x, y, z;
 	public:
-		Vector3() { x = y = z = 0;}
+		Vector3() { x = y = z = 0; }
 		Vector3(T x, T y, T z) : x(x), y(y), z(z)
 		{
 			Assert(!HasNaNs());
@@ -32,9 +32,9 @@ namespace pbrt
 			Assert(index < 3);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
-				case 2: return z;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
 			}
 		}
 
@@ -43,9 +43,9 @@ namespace pbrt
 			Assert(index < 3);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
-				case 2: return z;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
 			}
 		}
 
@@ -184,6 +184,12 @@ namespace pbrt
 	}
 
 	template<typename T>
+	inline uint32_t MaxDimension(const Vector3<T>& vector)
+	{
+		return (vector.x > vector.y) ? ((vector.x > vector.z) ? 0 : 2) : ((vector.y > vector.z) ? 1 : 2);
+	}
+
+	template<typename T>
 	inline Vector3<T> Permute(const Vector3<T>& vector, uint32_t x, uint32_t y, uint32_t z)
 	{
 		return Vector3<T>(vector[x], vector[y], vector[z]);
@@ -192,7 +198,7 @@ namespace pbrt
 	template<typename T>
 	inline void CoordinateSystem(const Vector3<T>& v1, Vector3<T>* v2, Vector3<T>* v3)
 	{
-		if(std::abs(v1.x) > std::abs(v1.y))
+		if (std::abs(v1.x) > std::abs(v1.y))
 			*v2 = Vector3<T>(-v1.z, 0, v1.x) / std::sqrt(v1.x * v1.x + v1.z * v1.z);
 		else
 			*v2 = Vector3<T>(0, -v1.z, v1.y) / std::sqrt(v1.y * v1.y + v1.z * v1.z);
@@ -200,13 +206,13 @@ namespace pbrt
 	}
 
 
-    template<typename T>
-    class Vector2
-    {
-    public:
-        T x, y;
+	template<typename T>
+	class Vector2
+	{
 	public:
-		Vector2() { x = y = 0;}
+		T x, y;
+	public:
+		Vector2() { x = y = 0; }
 		Vector2(T x, T y) : x(x), y(y)
 		{
 			Assert(!HasNaNs());
@@ -224,8 +230,8 @@ namespace pbrt
 			Assert(index < 2);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
+			case 0: return x;
+			case 1: return y;
 			}
 		}
 
@@ -234,8 +240,8 @@ namespace pbrt
 			Assert(index < 2);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
+			case 0: return x;
+			case 1: return y;
 			}
 		}
 
@@ -253,12 +259,12 @@ namespace pbrt
 
 		Vector2 operator-() const
 		{
-			return Vector3(-x, -y);
+			return Vector2(-x, -y);
 		}
 
 		Vector2 operator-(const Vector2& other) const
 		{
-			return Vector3(x - other.x, y - other.y);
+			return Vector2(x - other.x, y - other.y);
 		}
 
 		Vector2& operator-=(const Vector2& other)
@@ -270,7 +276,7 @@ namespace pbrt
 
 		Vector2 operator*(T scalar) const
 		{
-			return Vector3(scalar * x, scalar * y);
+			return Vector2(scalar * x, scalar * y);
 		}
 
 		Vector2& operator*=(T scalar)
@@ -284,7 +290,7 @@ namespace pbrt
 		{
 			Assert(divisor != 0);
 			Float inv = static_cast<Float>(1 / divisor);
-			return Vector3(x * inv, y * inv);
+			return Vector2(x * inv, y * inv);
 		}
 
 		Vector2& operator/=(T divisor)
@@ -420,9 +426,9 @@ namespace pbrt
 			Assert(index < 3);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
-				case 2: return z;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
 			}
 		}
 
@@ -431,9 +437,9 @@ namespace pbrt
 			Assert(index < 3);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
-				case 2: return z;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
 			}
 		}
 
@@ -625,8 +631,8 @@ namespace pbrt
 			Assert(index < 2);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
+			case 0: return x;
+			case 1: return y;
 			}
 		}
 
@@ -635,8 +641,8 @@ namespace pbrt
 			Assert(index < 2);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
+			case 0: return x;
+			case 1: return y;
 			}
 		}
 
@@ -796,7 +802,7 @@ namespace pbrt
 	public:
 		T x, y, z;
 	public:
-		Normal3() { x = y = z = 0;}
+		Normal3() { x = y = z = 0; }
 		Normal3(T x, T y, T z) : x(x), y(y), z(z)
 		{
 			Assert(!HasNaNs());
@@ -819,9 +825,9 @@ namespace pbrt
 			Assert(index < 3);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
-				case 2: return z;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
 			}
 		}
 
@@ -830,15 +836,25 @@ namespace pbrt
 			Assert(index < 3);
 			switch (index)
 			{
-				case 0: return x;
-				case 1: return y;
-				case 2: return z;
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
 			}
+		}
+
+		Normal3 operator+(const Normal3& other) const
+		{
+			return Normal3(x + other.x, y + other.y, z + other.z);
 		}
 
 		Normal3 operator-() const
 		{
 			return Normal3(-x, -y, -z);
+		}
+
+		Normal3 operator*(T scalar) const
+		{
+			return Normal3(scalar * x, scalar * y, scalar * z);
 		}
 
 		Normal3& operator*=(T scalar)
@@ -847,6 +863,11 @@ namespace pbrt
 			y *= scalar;
 			z *= scalar;
 			return *this;
+		}
+
+		Normal3 operator/(T scalar) const
+		{
+			return Normal3(x / scalar, y / scalar, z / scalar);
 		}
 
 		bool operator==(const Normal3& other) const
@@ -859,6 +880,18 @@ namespace pbrt
 			return x != other.x || y != other.y || z != other.z;
 		}
 	};
+
+	template<typename T>
+	inline Normal3<T> operator*(T scalar, const Normal3<T>& normal)
+	{
+		return normal * scalar;
+	}
+
+	template<typename T>
+	inline Normal3<T> Normalize(const Normal3<T>& normal)
+	{
+		return normal / normal.Length();
+	}
 
 	template<typename T>
 	inline T Dot(const Vector3<T>& vector, const Normal3<T>& normal)
@@ -894,6 +927,20 @@ namespace pbrt
 	inline T AbsDot(const Normal3<T>& n1, const Normal3<T>& n2)
 	{
 		return std::abs(Dot(n1, n2));
+	}
+
+	template<typename T>
+	inline Vector3<T> Cross(const Vector3<T>& vector, const Normal3<T>& normal)
+	{
+		double vx = vector.x, vy = vector.y, vz = vector.z;
+		double nx = normal.x, ny = normal.y, nz = normal.z;
+		return Vector3<T>(vy * nz - vz * ny, vz * nx - vx * nz, vx * ny - vy * nx);
+	}
+
+	template<typename T>
+	inline Vector3<T> Cross(const Normal3<T>& normal, const Vector3<T>& vector)
+	{
+		return Cross(vector, normal);
 	}
 
 	template<typename T>
@@ -933,7 +980,7 @@ namespace pbrt
 			Float tMax = std::numeric_limits<Float>::max(), Float time = 0.f, const std::shared_ptr<Medium> medium = nullptr)
 			: o(origin), d(direction), tMax(tMax), time(time), medium(medium) {}
 
-		Point3f operator()(Float t) { return o + d * t; }
+		Point3f operator()(Float t) const { return o + d * t; }
 	};
 
 	//ray differential
@@ -946,8 +993,10 @@ namespace pbrt
 	public:
 		RayDifferential() { hasDifferentials = false; }
 		RayDifferential(const Point3f& origin, const Vector3f& direction,
-						Float tMax = std::numeric_limits<Float>::max(), Float time = 0.f, const std::shared_ptr<Medium> medium = nullptr)
-						: Ray(origin, direction, tMax, time, medium) { hasDifferentials = false; }
+			Float tMax = std::numeric_limits<Float>::max(), Float time = 0.f, const std::shared_ptr<Medium> medium = nullptr)
+			: Ray(origin, direction, tMax, time, medium) {
+			hasDifferentials = false;
+		}
 		RayDifferential(const Ray& ray) : Ray(ray) { hasDifferentials = false; }
 
 		void ScaleDifferentials(Float s)
@@ -979,8 +1028,8 @@ namespace pbrt
 		}
 		Bounds3(const Point3<T>& point) : pMin(point), pMax(point) {}
 		Bounds3(const Point3<T>& p1, const Point3<T>& p2)
-		: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y), std::min(p1.z, p2.z)),
-		  pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y), std::max(p1.z, p2.z)) {}
+			: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y), std::min(p1.z, p2.z)),
+			pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y), std::max(p1.z, p2.z)) {}
 
 		//0 -- left bottom front
 		//1 -- right bottom front
@@ -993,8 +1042,8 @@ namespace pbrt
 		Point3<T> Corner(uint32_t corner) const
 		{
 			return Point3<T>((this->operator[](corner & 1u)).x,
-							 (this->operator[]((corner & 2u) ? 1 : 0)).y,
-							 (this->operator[]((corner & 4u) ? 1 : 0)).z);
+				(this->operator[]((corner & 2u) ? 1 : 0)).y,
+				(this->operator[]((corner & 4u) ? 1 : 0)).z);
 		}
 
 		Vector3<T> Diagonal() const { return pMax - pMin; }
@@ -1014,9 +1063,9 @@ namespace pbrt
 		uint32_t MaximumExtent() const
 		{
 			Vector3<T> d = Diagonal();
-			if(d.x > d.y && d.x > d.z)
+			if (d.x > d.y && d.x > d.z)
 				return 0;
-			else if(d.y > d.z)
+			else if (d.y > d.z)
 				return 1;
 			else
 				return 2;
@@ -1025,16 +1074,16 @@ namespace pbrt
 		Point3<T> Lerp(const Point3f& t) const
 		{
 			return Point3<T>(pbrt::Lerp(t.x, pMin.x, pMax.x),
-							 pbrt::Lerp(t.y, pMin.y, pMax.y),
-							 pbrt::Lerp(t.z, pMin.z, pMax.z));
+				pbrt::Lerp(t.y, pMin.y, pMax.y),
+				pbrt::Lerp(t.z, pMin.z, pMax.z));
 		}
 
 		Vector3<T> Offset(const Point3<T>& point) const
 		{
 			Vector3<T> o = point - pMin;
-			if(pMax.x > pMin.x) o.x /= pMax.x - pMin.x;
-			if(pMax.y > pMin.y) o.y /= pMax.y - pMin.y;
-			if(pMax.z > pMin.z) o.z /= pMax.z - pMin.z;
+			if (pMax.x > pMin.x) o.x /= pMax.x - pMin.x;
+			if (pMax.y > pMin.y) o.y /= pMax.y - pMin.y;
+			if (pMax.z > pMin.z) o.z /= pMax.z - pMin.z;
 		}
 
 		void BoundingSphere(Point3<T>* center, Float* radius) const
@@ -1046,22 +1095,22 @@ namespace pbrt
 		bool IntersectP(const Ray& ray, Float* hit_t0, Float* hit_t1) const
 		{
 			Float t0 = 0, t1 = ray.tMax;
-			for(uint32_t i = 0; i < 3; i++)
+			for (uint32_t i = 0; i < 3; i++)
 			{
 				//update interval for bounding box slab
 				Float invRayDir = 1.f / ray.d[i];
 				Float tNear = (pMin[i] - ray.o[i]) * invRayDir;
 				Float tFar = (pMax[i] - ray.o[i]) * invRayDir;
 				//update parametric interval from slab intersection t values
-				if(tNear > tFar)
+				if (tNear > tFar)
 					std::swap(tNear, tFar);
 				t0 = tNear > t0 ? tNear : t0;
 				t1 = tFar < t1 ? tFar : t1;
-				if(t0 > t1)
+				if (t0 > t1)
 					return false;
 			}
-			if(hit_t0) *hit_t0 = t0;
-			if(hit_t1) *hit_t1 = t1;
+			if (hit_t0) *hit_t0 = t0;
+			if (hit_t1) *hit_t1 = t1;
 			return true;
 		}
 
@@ -1072,14 +1121,14 @@ namespace pbrt
 			Float tyMin = (this->operator[](dirIsNegative[0]).y - ray.o.y) * invDir.y;
 			Float tyMax = (this->operator[](1u - dirIsNegative[0]).y - ray.o.y) * invDir.y;
 
-			if(txMin > tyMax || tyMin > txMax)
+			if (txMin > tyMax || tyMin > txMax)
 				return false;
 			Float tMin = tyMin > txMin ? tyMin : txMin;
 			Float tMax = tyMax < txMax ? tyMax : txMax;
 
 			Float tzMin = (this->operator[](dirIsNegative[0]).z - ray.o.z) * invDir.z;
 			Float tzMax = (this->operator[](1u - dirIsNegative[0]).z - ray.o.z) * invDir.z;
-			if(tMin > tzMax || tzMin > tMax)
+			if (tMin > tzMax || tzMin > tMax)
 				return false;
 			tMin = std::max(tMin, tzMin);
 			tMax = std::min(tMax, tzMax);
@@ -1093,8 +1142,8 @@ namespace pbrt
 			Assert(index < 2);
 			switch (index)
 			{
-				case 0: return pMin;
-				case 1: return pMax;
+			case 0: return pMin;
+			case 1: return pMax;
 			}
 		}
 		//0 -- pMin, 1 -- pMax
@@ -1103,8 +1152,8 @@ namespace pbrt
 			Assert(index < 2);
 			switch (index)
 			{
-				case 0: return pMin;
-				case 1: return pMax;
+			case 0: return pMin;
+			case 1: return pMax;
 			}
 		}
 	};
@@ -1113,33 +1162,33 @@ namespace pbrt
 	inline Bounds3<T> Union(const Bounds3<T>& bound, const Point3<T>& point)
 	{
 		return Bounds3<T>(Point3<T>(std::min(bound.pMin.x, point.x),
-									std::min(bound.pMin.y, point.y),
-									std::min(bound.pMin.z, point.z)),
-						  Point3<T>(std::max(bound.pMax.x, point.x),
-									std::max(bound.pMax.y, point.y),
-									std::max(bound.pMax.z, point.z)));
+			std::min(bound.pMin.y, point.y),
+			std::min(bound.pMin.z, point.z)),
+			Point3<T>(std::max(bound.pMax.x, point.x),
+				std::max(bound.pMax.y, point.y),
+				std::max(bound.pMax.z, point.z)));
 	}
 
 	template<typename T>
 	inline Bounds3<T> Union(const Bounds3<T>& b1, const Bounds3<T>& b2)
 	{
 		return Bounds3<T>(Point3<T>(std::min(b1.pMin.x, b2.pMin.x),
-									std::min(b1.pMin.y, b2.pMin.x),
-									std::min(b1.pMin.z, b2.pMin.x)),
-						  Point3<T>(std::max(b1.pMax.x, b2.pMax.x),
-									std::max(b1.pMax.y, b2.pMax.x),
-									std::max(b1.pMax.z, b2.pMax.x)));
+			std::min(b1.pMin.y, b2.pMin.x),
+			std::min(b1.pMin.z, b2.pMin.x)),
+			Point3<T>(std::max(b1.pMax.x, b2.pMax.x),
+				std::max(b1.pMax.y, b2.pMax.x),
+				std::max(b1.pMax.z, b2.pMax.x)));
 	}
 
 	template<typename T>
 	inline Bounds3<T> Intersect(const Bounds3<T>& b1, const Bounds3<T>& b2)
 	{
 		return Bounds3<T>(Point3<T>(std::max(b1.pMin.x, b2.pMin.x),
-									std::max(b1.pMin.y, b2.pMin.x),
-									std::max(b1.pMin.z, b2.pMin.x)),
-						  Point3<T>(std::min(b1.pMax.x, b2.pMax.x),
-									std::min(b1.pMax.y, b2.pMax.x),
-									std::min(b1.pMax.z, b2.pMax.x)));
+			std::max(b1.pMin.y, b2.pMin.x),
+			std::max(b1.pMin.z, b2.pMin.x)),
+			Point3<T>(std::min(b1.pMax.x, b2.pMax.x),
+				std::min(b1.pMax.y, b2.pMax.x),
+				std::min(b1.pMax.z, b2.pMax.x)));
 	}
 
 	template<typename T>
@@ -1155,23 +1204,23 @@ namespace pbrt
 	inline bool Inside(const Point3<T>& point, const Bounds3<T>& bound)
 	{
 		return point.x >= bound.pMin.x && point.x <= bound.pMax.x &&
-			   point.y >= bound.pMin.y && point.y <= bound.pMax.y &&
-			   point.z >= bound.pMin.z && point.y <= bound.pMax.z;
+			point.y >= bound.pMin.y && point.y <= bound.pMax.y &&
+			point.z >= bound.pMin.z && point.y <= bound.pMax.z;
 	}
 
 	template<typename T>
 	inline bool InsideExclusive(const Point3<T>& point, const Bounds3<T>& bound)
 	{
 		return point.x >= bound.pMin.x && point.x < bound.pMax.x &&
-			   point.y >= bound.pMin.y && point.y < bound.pMax.y &&
-			   point.z >= bound.pMin.z && point.y < bound.pMax.z;
+			point.y >= bound.pMin.y && point.y < bound.pMax.y &&
+			point.z >= bound.pMin.z && point.y < bound.pMax.z;
 	}
 
 	template<typename T>
 	inline Bounds3<T> Expand(const Bounds3<T>& bound, T delta)
 	{
 		return Bounds3<T>(bound.pMin - Vector3<T>(delta, delta, delta),
-						  bound.pMax + Vector3<T>(delta, delta, delta));
+			bound.pMax + Vector3<T>(delta, delta, delta));
 	}
 
 
